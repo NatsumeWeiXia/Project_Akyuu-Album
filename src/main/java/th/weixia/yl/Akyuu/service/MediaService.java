@@ -28,13 +28,13 @@ public class MediaService {
                 .orElseThrow(() -> new RuntimeException("相册不存在"));
         
         // 权限检查：公共相册或用户有权限访问
-        if (!album.getIsPublic() && !album.getOwner().getId().equals(uploader.getId())) {
+        if (!album.getIsPublic() && !album.getOwnerId().equals(uploader.getId())) {
             throw new RuntimeException("没有权限上传到此相册");
         }
         
         Media media = new Media();
-        media.setAlbum(album);
-        media.setUploader(uploader);
+        media.setAlbumId(album.getId());
+        media.setUploaderId(uploader.getId());
         media.setTitle(title != null ? title : file.getOriginalFilename());
         media.setFilename(file.getOriginalFilename());
         media.setContentType(file.getContentType());
@@ -72,9 +72,12 @@ public class MediaService {
         Media media = mediaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("媒体文件不存在"));
         
+        Album album = albumRepository.findById(media.getAlbumId())
+                .orElseThrow(() -> new RuntimeException("相册不存在"));
+        
         // 权限检查：只有上传者或相册所有者可以删除
-        if (!media.getUploader().getId().equals(currentUser.getId()) && 
-            !media.getAlbum().getOwner().getId().equals(currentUser.getId())) {
+        if (!media.getUploaderId().equals(currentUser.getId()) && 
+            !album.getOwnerId().equals(currentUser.getId())) {
             throw new RuntimeException("没有权限删除此文件");
         }
         

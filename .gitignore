@@ -27,4 +27,6 @@ replay_pid*
 .gradle
 .idea
 .git
-bin
+.vscode
+bin/
+build/
