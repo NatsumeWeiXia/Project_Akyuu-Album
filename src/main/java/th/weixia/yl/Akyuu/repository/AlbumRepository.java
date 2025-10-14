@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface AlbumRepository extends JpaRepository<Album, Long> {
     Page<Album> findByIsPublicTrue(Pageable pageable);
+
     List<Album> findByOwnerId(Long ownerId);
+
     boolean existsByOwnerIdAndName(Long ownerId, String name);
 }

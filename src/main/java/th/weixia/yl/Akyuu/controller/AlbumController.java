@@ -63,7 +63,8 @@ public class AlbumController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Album> updateAlbum(@PathVariable Long id, @Valid @RequestBody AlbumRequest request, Authentication authentication) {
+    public ResponseEntity<Album> updateAlbum(@PathVariable Long id, @Valid @RequestBody AlbumRequest request,
+            Authentication authentication) {
         User user = userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 

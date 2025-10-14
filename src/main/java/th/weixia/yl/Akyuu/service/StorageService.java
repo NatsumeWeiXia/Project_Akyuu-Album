@@ -7,8 +7,12 @@ import java.nio.file.Path;
 
 public interface StorageService {
     void init();
+
     String store(MultipartFile file, Long albumId, Long mediaId);
+
     Path load(String filename);
+
     Resource loadAsResource(String filename);
+
     void delete(String filename);
 }

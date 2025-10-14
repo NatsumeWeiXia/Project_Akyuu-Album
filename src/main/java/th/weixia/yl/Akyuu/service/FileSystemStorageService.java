@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,9 +45,14 @@ public class FileSystemStorageService implements StorageService {
             Path albumDir = this.rootLocation.resolve(albumId.toString());
             Files.createDirectories(albumDir);
 
-            String filename = mediaId + "-" + StringUtils.cleanPath(file.getOriginalFilename());
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                throw new RuntimeException("File original filename is null.");
+            }
+            String filename = mediaId + "-" + StringUtils.cleanPath(originalFilename);
             if (filename.contains("..")) {
-                throw new RuntimeException("Cannot store file with relative path outside current directory: " + filename);
+                throw new RuntimeException(
+                        "Cannot store file with relative path outside current directory: " + filename);
             }
 
             try (InputStream inputStream = file.getInputStream()) {

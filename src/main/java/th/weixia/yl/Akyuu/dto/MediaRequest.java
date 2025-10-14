@@ -9,9 +9,9 @@ import javax.validation.constraints.NotNull;
 public class MediaRequest {
     @NotNull(message = "相册ID不能为空")
     private Long albumId;
-    
+
     private String title;
-    
+
     @NotNull(message = "文件不能为空")
     private MultipartFile file;
 }

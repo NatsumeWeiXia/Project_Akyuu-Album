@@ -9,7 +9,10 @@ import java.util.List;
 
 public interface MediaRepository extends JpaRepository<Media, Long> {
     Page<Media> findByAlbumId(Long albumId, Pageable pageable);
+
     List<Media> findByAlbumIdAndContentTypeStartingWith(Long albumId, String contentType);
+
     List<Media> findByAlbumIdOrderByCreatedAtDesc(Long albumId);
+
     List<Media> findByUploaderId(Long uploaderId);
 }
