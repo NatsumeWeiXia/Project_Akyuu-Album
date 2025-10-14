@@ -8,18 +8,22 @@ import javax.validation.constraints.Size;
 import java.time.Instant;
 
 @Entity
-@Table(name = "album_members")
+@Table(name = "album_members", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"album_id", "user_id"})
+})
 @Data
 public class AlbumMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "album_id", nullable = false)
-    private Long albumId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "album_id", nullable = false)
+    private Album album;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Size(max = 16)
     @Column(nullable = false)

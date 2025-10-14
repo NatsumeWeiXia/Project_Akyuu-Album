@@ -42,48 +42,68 @@ public class MediaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getMedia(@PathVariable Long id) {
-        Optional<Media> media = mediaService.getMedia(id);
-        return media.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> getMedia(@PathVariable Long id, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        try {
+            Optional<Media> media = mediaService.getMedia(id, currentUser.getId());
+            return media.map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<Resource> downloadMedia(@PathVariable Long id) {
-        Optional<Media> mediaOptional = mediaService.getMedia(id);
-        if (!mediaOptional.isPresent()) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<Resource> downloadMedia(@PathVariable Long id, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        try {
+            Optional<Media> mediaOptional = mediaService.getMedia(id, currentUser.getId());
+            if (!mediaOptional.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Media media = mediaOptional.get();
+            Resource resource = storageService.loadAsResource(media.getStoragePath());
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + media.getFilename() + "\"")
+                    .contentType(MediaType.parseMediaType(media.getContentType()))
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(403).body(null);
         }
-
-        Media media = mediaOptional.get();
-        Resource resource = storageService.loadAsResource(media.getStoragePath());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + media.getFilename() + "\"")
-                .contentType(MediaType.parseMediaType(media.getContentType()))
-                .body(resource);
     }
 
     @GetMapping("/{id}/preview")
-    public ResponseEntity<Resource> previewMedia(@PathVariable Long id) {
-        Optional<Media> mediaOptional = mediaService.getMedia(id);
-        if (!mediaOptional.isPresent()) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<Resource> previewMedia(@PathVariable Long id, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        try {
+            Optional<Media> mediaOptional = mediaService.getMedia(id, currentUser.getId());
+            if (!mediaOptional.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Media media = mediaOptional.get();
+            Resource resource = storageService.loadAsResource(media.getStoragePath());
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(media.getContentType()))
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(403).body(null);
         }
-
-        Media media = mediaOptional.get();
-        Resource resource = storageService.loadAsResource(media.getStoragePath());
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(media.getContentType()))
-                .body(resource);
     }
 
     @GetMapping("/album/{albumId}")
-    public ResponseEntity<List<Media>> getAlbumMedia(@PathVariable Long albumId) {
-        List<Media> mediaList = mediaService.getMediaByAlbum(albumId);
-        return ResponseEntity.ok(mediaList);
+    public ResponseEntity<?> getAlbumMedia(@PathVariable Long albumId, Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        try {
+            List<Media> mediaList = mediaService.getMediaByAlbum(albumId, currentUser.getId());
+            return ResponseEntity.ok(mediaList);
+        } catch (Exception e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
