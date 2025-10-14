@@ -23,10 +23,15 @@
 hs_err_pid*
 replay_pid*
 
-.fake
-.gradle
-.idea
-.git
-.vscode
+.*/
+.*
 bin/
 build/
+rules/
+AGENTS.md
+CLAUDE.md
+cloudbaserc.json
+CODEBUDDY.md
+
+# Environment variables
+.env.local
