@@ -39,3 +39,5 @@ CODEBUDDY.md
 # Environment variables
 .env.local
 
+
+.fake
