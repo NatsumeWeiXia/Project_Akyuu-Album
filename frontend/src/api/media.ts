@@ -49,7 +49,7 @@ export const mediaApi = {
     params.append('size', size.toString())
     params.append('sort', sort)
     
-    const response = await apiClient.get<PageResponse<Media>>(`/albums/${albumId}/media?${params}`)
+    const response = await apiClient.get<Media[]>(`/media/album/${albumId}?${params}`)
     return response.data!
   }
 }

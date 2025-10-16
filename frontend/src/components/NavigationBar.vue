@@ -26,6 +26,11 @@
         <span>我的相册</span>
       </el-menu-item>
       
+      <el-menu-item index="/api-test">
+        <el-icon><Tools /></el-icon>
+        <span>API测试</span>
+      </el-menu-item>
+      
       <el-sub-menu index="profile">
         <template #title>
           <el-icon><User /></el-icon>
@@ -61,6 +66,7 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { Tools } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const userStore = useUserStore()
