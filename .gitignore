@@ -23,11 +23,6 @@
 hs_err_pid*
 replay_pid*
 
-# Frontend dependencies
-frontend/node_modules/
-/frontend/node_modules/
-**/node_modules/
-node_modules/
 bin/
 build/
 rules/
@@ -38,4 +33,3 @@ CODEBUDDY.md
 
 # Environment variables
 .env.local
-

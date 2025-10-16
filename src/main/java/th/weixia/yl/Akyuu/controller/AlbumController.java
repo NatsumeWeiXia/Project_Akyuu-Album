@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import th.weixia.yl.Akyuu.dto.AlbumRequest;
+import th.weixia.yl.Akyuu.dto.PageResponse;
 import th.weixia.yl.Akyuu.entity.Album;
 import th.weixia.yl.Akyuu.entity.User;
 import th.weixia.yl.Akyuu.repository.AlbumRepository;
@@ -48,8 +49,9 @@ public class AlbumController {
     }
 
     @GetMapping("/public")
-    public ResponseEntity<Page<Album>> getPublicAlbums(Pageable pageable) {
-        return ResponseEntity.ok(albumRepository.findByIsPublicTrue(pageable));
+    public ResponseEntity<PageResponse<Album>> getPublicAlbums(Pageable pageable) {
+        Page<Album> albums = albumRepository.findByIsPublicTrue(pageable);
+        return ResponseEntity.ok(PageResponse.fromPage(albums));
     }
 
     @GetMapping("/mine")
