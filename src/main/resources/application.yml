@@ -1,27 +1,32 @@
 server:
-  port: 8080
+  port: 21001
 
 spring:
   datasource:
     url: jdbc:postgresql://192.168.1.6:5432/Akyuu
     username: postgres
     password: sakuya
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
         jdbc.lob.non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
   servlet:
     multipart:
-      max-file-size: 50MB
-      max-request-size: 60MB
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 logging:
   level:
+    th.weixia.yl.Akyuu: DEBUG
     org.springframework: INFO
+    org.springframework.security: DEBUG
     org.hibernate.SQL: WARN
 
 app:
@@ -29,4 +34,5 @@ app:
     local:
       basePath: uploads
   jwt:
-    secret: ${AKYUU_JWT_SECRET:change-me}
+    secret: ${AKYUU_JWT_SECRET:mySecretKeyThatIsLongEnoughForJWTAndHasMoreThan32Characters}
+    expiration: 86400000

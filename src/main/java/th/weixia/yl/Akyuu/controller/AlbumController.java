@@ -16,8 +16,8 @@ import th.weixia.yl.Akyuu.repository.AlbumRepository;
 import th.weixia.yl.Akyuu.repository.UserRepository;
 import th.weixia.yl.Akyuu.service.AlbumMemberService;
 
-import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController

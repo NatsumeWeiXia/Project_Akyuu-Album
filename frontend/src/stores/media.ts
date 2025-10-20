@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { Media, PageResponse } from '@/types/api'
+import { ref, readonly } from 'vue'
+import type { Media } from '@/types/api'
 import { mediaApi } from '@/api'
 
 export const useMediaStore = defineStore('media', () => {
-  const albumMedia = ref<PageResponse<Media> | null>(null)
+  const albumMedia = ref<Media[] | null>(null)
   const currentMedia = ref<Media | null>(null)
   const loading = ref(false)
   const uploadProgress = ref(0)
@@ -65,7 +65,7 @@ export const useMediaStore = defineStore('media', () => {
     }
     // 刷新媒体列表
     if (albumMedia.value) {
-      const albumId = albumMedia.value.content[0]?.albumId
+      const albumId = albumMedia.value[0]?.albumId
       if (albumId) {
         await fetchAlbumMedia(albumId)
       }

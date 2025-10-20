@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, readonly } from 'vue'
 import type { Album, PageResponse } from '@/types/api'
 import { albumApi } from '@/api'
 

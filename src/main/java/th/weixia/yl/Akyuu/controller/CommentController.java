@@ -9,7 +9,7 @@ import th.weixia.yl.Akyuu.entity.Comment;
 import th.weixia.yl.Akyuu.security.UserPrincipal;
 import th.weixia.yl.Akyuu.service.CommentService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController

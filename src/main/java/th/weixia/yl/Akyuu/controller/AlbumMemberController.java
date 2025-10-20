@@ -9,7 +9,7 @@ import th.weixia.yl.Akyuu.entity.AlbumMember;
 import th.weixia.yl.Akyuu.security.UserPrincipal;
 import th.weixia.yl.Akyuu.service.AlbumMemberService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController

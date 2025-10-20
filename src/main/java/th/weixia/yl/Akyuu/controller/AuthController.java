@@ -5,9 +5,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import th.weixia.yl.Akyuu.dto.ApiResponse;
 import th.weixia.yl.Akyuu.dto.AuthResponse;
 import th.weixia.yl.Akyuu.dto.LoginRequest;
 import th.weixia.yl.Akyuu.dto.RegisterRequest;
@@ -15,7 +17,7 @@ import th.weixia.yl.Akyuu.entity.User;
 import th.weixia.yl.Akyuu.repository.UserRepository;
 import th.weixia.yl.Akyuu.security.JwtUtil;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -28,7 +30,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already exists");
         }
@@ -42,11 +44,11 @@ public class AuthController {
         User savedUser = userRepository.save(user);
         String token = jwtUtil.generateToken(savedUser.getUsername());
 
-        return ResponseEntity.ok(new AuthResponse(token, savedUser));
+        return ResponseEntity.ok(ApiResponse.success(new AuthResponse(token, savedUser)));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
@@ -55,15 +57,11 @@ public class AuthController {
 
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return ResponseEntity.ok(new AuthResponse(token, user));
+        return ResponseEntity.ok(ApiResponse.success(new AuthResponse(token, user)));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return ResponseEntity.ok(user);
+    public ResponseEntity<ApiResponse<User>> getCurrentUser(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(ApiResponse.success(user));
     }
 }

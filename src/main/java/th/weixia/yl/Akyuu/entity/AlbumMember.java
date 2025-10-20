@@ -3,8 +3,8 @@ package th.weixia.yl.Akyuu.entity;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.*;
-import javax.validation.constraints.Size;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 
 @Entity

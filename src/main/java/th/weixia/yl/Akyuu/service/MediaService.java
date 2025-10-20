@@ -11,7 +11,7 @@ import th.weixia.yl.Akyuu.entity.User;
 import th.weixia.yl.Akyuu.repository.AlbumRepository;
 import th.weixia.yl.Akyuu.repository.MediaRepository;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,10 +49,6 @@ public class MediaService {
             // 存储文件
             String storagePath = storageService.store(file, albumId, savedMedia.getId());
             savedMedia.setStoragePath(storagePath);
-
-            // 提取元数据（图片宽高/视频时长等）
-            // TODO: 实现元数据提取
-
             return mediaRepository.save(savedMedia);
         } catch (Exception e) {
             // 如果存储失败，删除数据库记录
