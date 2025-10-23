@@ -59,33 +59,33 @@ class ApiClient {
     )
   }
 
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.client.get<ApiResponse<T>>(url, config)
-    return response.data
+    return response.data.data!
   }
 
-  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.client.post<ApiResponse<T>>(url, data, config)
-    return response.data
+    return response.data.data!
   }
 
-  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.client.put<ApiResponse<T>>(url, data, config)
-    return response.data
+    return response.data.data!
   }
 
-  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.client.patch<ApiResponse<T>>(url, data, config)
-    return response.data
+    return response.data.data!
   }
 
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.client.delete<ApiResponse<T>>(url, config)
-    return response.data
+    return response.data.data!
   }
 
   // 文件上传
-  async upload<T>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async upload<T>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.client.post<ApiResponse<T>>(url, formData, {
       ...config,
       headers: {
@@ -93,7 +93,7 @@ class ApiClient {
         'Content-Type': 'multipart/form-data'
       }
     })
-    return response.data
+    return response.data.data!
   }
 }
 

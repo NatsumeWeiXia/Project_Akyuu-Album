@@ -4,17 +4,27 @@ import type { Comment } from '@/types/api'
 import { commentApi } from '@/api'
 
 export const useCommentStore = defineStore('comment', () => {
-  const mediaComments = ref<Comment[]>([])
+  const mediaComments = ref<Record<number, Comment[]>>({})
   const commentCounts = ref<Record<number, number>>({})
   const loading = ref(false)
+
+  // 辅助函数：将只读评论转换为可变评论
+  const convertComment = (comment: Comment): Comment => ({
+    ...comment,
+    replies: comment.replies ? comment.replies.map(convertComment) : undefined
+  })
 
   // 获取媒体评论
   const fetchMediaComments = async (mediaId: number) => {
     loading.value = true
     try {
       const comments = await commentApi.getMediaComments(mediaId)
-      mediaComments.value = comments
-      return comments
+      // 将只读评论转换为可变评论
+      if (comments) {
+        mediaComments.value[mediaId] = comments.map(convertComment)
+        return comments.map(convertComment)
+      }
+      return []
     } finally {
       loading.value = false
     }
@@ -50,7 +60,7 @@ export const useCommentStore = defineStore('comment', () => {
   // 获取评论数量
   const fetchCommentCount = async (mediaId: number) => {
     const count = await commentApi.getCommentCount(mediaId)
-    commentCounts.value[mediaId] = count
+    commentCounts.value[mediaId] = count ?? 0
     return count
   }
 

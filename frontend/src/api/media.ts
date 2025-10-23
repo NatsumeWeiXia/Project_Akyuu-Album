@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { Media, PageResponse } from '@/types/api'
+import type { Media } from '@/types/api'
 
 export const mediaApi = {
   // 上传媒体文件
@@ -12,27 +12,35 @@ export const mediaApi = {
     }
     
     const response = await apiClient.upload<Media>('/media/upload', formData)
-    return response.data!
+    return response
   },
 
   // 获取媒体详情
   async getMedia(id: number) {
     const response = await apiClient.get<Media>(`/media/${id}`)
-    return response.data!
+    return response
   },
 
   // 下载媒体文件
   async downloadMedia(id: number): Promise<Blob> {
-    const response = await apiClient.client.get(`/media/${id}/download`, {
+    const response = await apiClient.get<Blob>(`/media/${id}/download`, {
       responseType: 'blob'
     })
-    return response.data
+    return response
+  },
+
+  // 预览媒体文件
+  async previewMedia(id: number): Promise<Blob> {
+    const response = await apiClient.get<Blob>(`/media/${id}/preview`, {
+      responseType: 'blob'
+    })
+    return response
   },
 
   // 删除媒体文件
   async deleteMedia(id: number) {
     const response = await apiClient.delete<void>(`/media/${id}`)
-    return response.data!
+    return response
   },
 
   // 获取相册中的媒体列表
@@ -50,6 +58,6 @@ export const mediaApi = {
     params.append('sort', sort)
     
     const response = await apiClient.get<Media[]>(`/media/album/${albumId}?${params}`)
-    return response.data!
+    return response
   }
 }

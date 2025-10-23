@@ -6,6 +6,7 @@ import { authApi } from '@/api'
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null)
   const token = ref<string | null>(localStorage.getItem('token'))
+  const loading = ref(false)
 
   const isLoggedIn = computed(() => !!token.value && !!user.value)
   const isAdmin = computed(() => user.value?.role === 'ADMIN')
@@ -73,6 +74,20 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // 更新当前用户信息
+  const updateCurrentUser = async (userData: Partial<User>) => {
+    loading.value = true
+    try {
+      const response = await authApi.updateCurrentUser(userData)
+      setUser(response.user)
+      return response
+    } catch (error) {
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 登出
   const logout = () => {
     clearToken()
@@ -84,7 +99,7 @@ export const useUserStore = defineStore('user', () => {
     if (token.value) {
       try {
         await fetchCurrentUser()
-      } catch (error) {
+      } catch  {
         // 如果获取用户信息失败，清除token
         clearToken()
       }
@@ -94,6 +109,7 @@ export const useUserStore = defineStore('user', () => {
   return {
     user: readonly(user),
     token: readonly(token),
+    loading: readonly(loading),
     isLoggedIn,
     isAdmin,
     setToken,
@@ -103,6 +119,7 @@ export const useUserStore = defineStore('user', () => {
     login,
     register,
     fetchCurrentUser,
+    updateCurrentUser,
     logout,
     initializeAuth
   }

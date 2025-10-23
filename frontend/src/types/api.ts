@@ -2,6 +2,9 @@ export interface User {
   id: number
   username: string
   nickname: string
+  email?: string
+  bio?: string
+  avatar?: string
   avatarUrl?: string
   role: string
   createdAt: string
@@ -14,9 +17,11 @@ export interface Album {
   description?: string
   isPublic: boolean
   ownerId: number
+  coverImage?: string
   createdAt: string
   updatedAt: string
   owner?: User
+  members?: readonly AlbumMember[]
   memberCount?: number
   mediaCount?: number
 }
@@ -26,6 +31,7 @@ export interface AlbumMember {
   albumId: number
   userId: number
   role: string
+  canUpload: boolean
   createdAt: string
   user?: User
 }
@@ -47,6 +53,9 @@ export interface Media {
   updatedAt: string
   uploader?: User
   album?: Album
+  type: 'image' | 'video' | 'other'
+  url: string
+  thumbnailUrl?: string
 }
 
 export interface Comment {
@@ -58,11 +67,11 @@ export interface Comment {
   createdAt: string
   updatedAt: string
   author?: User
-  replies?: Comment[]
+  replies?: readonly Comment[]
 }
 
 export interface PageResponse<T> {
-  content: T[]
+  content: readonly T[]
   totalElements: number
   totalPages: number
   size: number
@@ -94,9 +103,9 @@ export interface CommentRequest {
   parentId?: number
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   code: number
   message: string
   data?: T
-  details?: any
+  details?: unknown
 }

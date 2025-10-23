@@ -4,7 +4,7 @@ import type { Media } from '@/types/api'
 import { mediaApi } from '@/api'
 
 export const useMediaStore = defineStore('media', () => {
-  const albumMedia = ref<Media[] | null>(null)
+  const albumMedia = ref<Media[]>([])
   const currentMedia = ref<Media | null>(null)
   const loading = ref(false)
   const uploadProgress = ref(0)
@@ -47,7 +47,7 @@ export const useMediaStore = defineStore('media', () => {
     try {
       const media = await mediaApi.uploadMedia(albumId, file, title)
       // 刷新当前相册的媒体列表
-      if (albumMedia.value) {
+      if (albumMedia.value.length > 0) {
         await fetchAlbumMedia(albumId)
       }
       return media
@@ -64,7 +64,7 @@ export const useMediaStore = defineStore('media', () => {
       currentMedia.value = null
     }
     // 刷新媒体列表
-    if (albumMedia.value) {
+    if (albumMedia.value.length > 0) {
       const albumId = albumMedia.value[0]?.albumId
       if (albumId) {
         await fetchAlbumMedia(albumId)

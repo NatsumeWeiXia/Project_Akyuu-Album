@@ -7,8 +7,8 @@
         <p>{{ albumStore.currentAlbum?.description }}</p>
         <div class="album-meta">
           <span class="owner">
-            <el-icon><User /></el-icon>
-            {{ albumStore.currentAlbum?.owner.nickname || albumStore.currentAlbum?.owner.username }}
+            <el-icon><UserIcon /></el-icon>
+            {{ albumStore.currentAlbum?.owner?.nickname || albumStore.currentAlbum?.owner?.username }}
           </span>
           <el-tag 
             :type="albumStore.currentAlbum?.isPublic ? 'success' : 'warning'" 
@@ -47,12 +47,11 @@
           编辑相册
         </el-button>
         
-        <el-button 
-          v-if="canEdit" 
-          @click="showMemberDialog = true"
-          :icon="User"
-        >
-          成员管理
+                  <el-button 
+                    v-if="canEdit" 
+                    @click="showMemberDialog = true"
+                    :icon="UserIcon"
+                  >          成员管理
         </el-button>
         
         <el-button 
@@ -116,7 +115,7 @@
               </el-image>
               <div v-else class="video-preview">
                 <el-icon size="48"><VideoPlay /></el-icon>
-                <span class="video-duration">{{ formatDuration(media.duration) }}</span>
+                <span class="video-duration">{{ formatDuration(media.durationSeconds) }}</span>
               </div>
               <div class="media-overlay">
                 <div class="media-actions">
@@ -194,11 +193,11 @@
       <div class="member-list">
         <div class="member-item" v-for="member in albumMembers" :key="member.id">
           <div class="member-info">
-            <el-avatar :size="32" :src="member.avatar">
-              {{ member.nickname?.[0] || member.username[0] }}
+            <el-avatar :size="32" :src="member?.avatar">
+              {{ member?.nickname?.[0] || member?.username?.[0] || '?' }}
             </el-avatar>
             <div class="member-details">
-              <span class="member-name">{{ member.nickname || member.username }}</span>
+              <span class="member-name">{{ member?.nickname || member?.username }}</span>
               <span class="member-role">{{ member.role }}</span>
             </div>
           </div>
@@ -238,12 +237,12 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { useAlbumStore } from '@/stores/album'
 import { useMediaStore } from '@/stores/media'
 import { useUserStore } from '@/stores/user'
-import type { Media } from '@/types'
+import type { Media, User } from '@/types/api'
 import {
   ArrowLeft,
   Upload,
   Edit,
-  User,
+  User as UserIcon,
   Delete,
   Picture,
   VideoPlay
@@ -281,31 +280,31 @@ const editRules: FormRules = {
 
 const canUpload = computed(() => {
   if (!albumStore.currentAlbum) return false
-  if (albumStore.currentAlbum.owner.id === userStore.user?.id) return true
+  if (albumStore.currentAlbum.owner?.id === userStore.user?.id) return true
   return albumStore.currentAlbum.members?.some(
     member => member.userId === userStore.user?.id && member.canUpload
   )
 })
 
 const canEdit = computed(() => {
-  return albumStore.currentAlbum?.owner.id === userStore.user?.id
+  return albumStore.currentAlbum?.owner?.id === userStore.user?.id
 })
 
 const canDelete = computed(() => {
-  return albumStore.currentAlbum?.owner.id === userStore.user?.id
+  return albumStore.currentAlbum?.owner?.id === userStore.user?.id
 })
 
 const albumMembers = computed(() => {
-  return albumStore.currentAlbum?.members?.map(m => m.user) || []
+  return albumStore.currentAlbum?.members?.map(m => m.user).filter((user): user is User => !!user) || []
 })
 
-const canRemoveMember = (member: any) => {
-  return albumStore.currentAlbum?.owner.id === userStore.user?.id && 
+const canRemoveMember = (member: User) => {
+  return albumStore.currentAlbum?.owner?.id === userStore.user?.id && 
          member.id !== userStore.user?.id
 }
 
-const canDeleteMedia = (media: Media) => {
-  if (albumStore.currentAlbum?.owner.id === userStore.user?.id) return true
+const canDeleteMedia = (media: Readonly<Media>) => {
+  if (albumStore.currentAlbum?.owner?.id === userStore.user?.id) return true
   return media.uploaderId === userStore.user?.id
 }
 
@@ -320,12 +319,12 @@ const formatDuration = (seconds?: number) => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
 }
 
-const handleFileChange = (file: any) => {
+const handleFileChange = (file: File) => {
   // 处理文件上传逻辑
   console.log('Selected file:', file)
 }
 
-const openMediaDetail = (media: Media) => {
+const openMediaDetail = (media: Readonly<Media>) => {
   router.push(`/media/${media.id}`)
 }
 
@@ -335,10 +334,10 @@ const handleEdit = async () => {
   await editFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        await albumStore.updateAlbum(albumId.value, editForm)
+        await albumStore.updateAlbum(parseInt(albumId.value), editForm.name, editForm.description, editForm.isPublic)
         ElMessage.success('相册更新成功')
         showEditDialog.value = false
-      } catch (error) {
+      } catch  {
         ElMessage.error('相册更新失败')
       }
     }
@@ -356,16 +355,16 @@ const handleDelete = () => {
     }
   ).then(async () => {
     try {
-      await albumStore.deleteAlbum(albumId.value)
+      await albumStore.deleteAlbum(parseInt(albumId.value))
       ElMessage.success('相册删除成功')
       router.push('/albums/mine')
-    } catch (error) {
+    } catch  {
       ElMessage.error('相册删除失败')
     }
   })
 }
 
-const handleDeleteMedia = async (media: Media) => {
+const handleDeleteMedia = async (media: Readonly<Media>) => {
   ElMessageBox.confirm(
     '确定要删除这个媒体文件吗？',
     '删除确认',
@@ -378,7 +377,7 @@ const handleDeleteMedia = async (media: Media) => {
     try {
       await mediaStore.deleteMedia(media.id)
       ElMessage.success('媒体文件删除成功')
-    } catch (error) {
+    } catch  {
       ElMessage.error('媒体文件删除失败')
     }
   })
@@ -388,17 +387,17 @@ const handleAddMember = async () => {
   if (!newMemberUsername.value.trim()) return
   
   try {
-    await albumStore.addAlbumMember(albumId.value, newMemberUsername.value.trim())
+    await albumStore.addAlbumMember(parseInt(albumId.value), newMemberUsername.value.trim())
     ElMessage.success('成员添加成功')
     newMemberUsername.value = ''
-  } catch (error) {
+  } catch  {
     ElMessage.error('成员添加失败')
   }
 }
 
-const handleRemoveMember = async (member: any) => {
+const handleRemoveMember = async (member: User) => {
   ElMessageBox.confirm(
-    `确定要将 ${member.nickname || member.username} 移出相册吗？`,
+    `确定要将 ${member?.nickname || member?.username || '该用户'} 移出相册吗？`,
     '移除确认',
     {
       confirmButtonText: '确定',
@@ -407,17 +406,17 @@ const handleRemoveMember = async (member: any) => {
     }
   ).then(async () => {
     try {
-      await albumStore.removeAlbumMember(albumId.value, member.id)
+      await albumStore.removeAlbumMember(parseInt(albumId.value), member.id)
       ElMessage.success('成员移除成功')
-    } catch (error) {
+    } catch  {
       ElMessage.error('成员移除失败')
     }
   })
 }
 
 onMounted(async () => {
-  await albumStore.fetchAlbum(albumId.value)
-  await mediaStore.fetchAlbumMedia(albumId.value)
+  await albumStore.fetchAlbum(parseInt(albumId.value))
+  await mediaStore.fetchAlbumMedia(parseInt(albumId.value))
   
   if (albumStore.currentAlbum) {
     editForm.name = albumStore.currentAlbum.name

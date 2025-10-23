@@ -7,7 +7,7 @@
         <div class="media-meta">
           <span class="file-size">
             <el-icon><Document /></el-icon>
-            {{ formatFileSize(mediaStore.currentMedia?.fileSize) }}
+            {{ formatFileSize(mediaStore.currentMedia?.sizeBytes) }}
           </span>
           <span class="upload-date">
             <el-icon><Calendar /></el-icon>
@@ -15,7 +15,7 @@
           </span>
           <span class="uploader">
             <el-icon><User /></el-icon>
-            {{ mediaStore.currentMedia?.uploader.nickname || mediaStore.currentMedia?.uploader.username }}
+            {{ mediaStore.currentMedia?.uploader?.nickname || mediaStore.currentMedia?.uploader?.username }}
           </span>
         </div>
       </div>
@@ -89,7 +89,7 @@
       <!-- 发表评论 -->
       <div v-if="userStore.isLoggedIn" class="comment-form">
         <el-avatar :size="40" :src="userStore.user?.avatar">
-          {{ userStore.user?.nickname?.[0] || userStore.user?.username[0] }}
+          {{ userStore.user?.nickname?.[0] || userStore.user?.username?.[0] || '?' }}
         </el-avatar>
         <div class="comment-input">
           <el-input
@@ -119,12 +119,12 @@
         </div>
         
         <div v-else class="comment-item" v-for="comment in comments" :key="comment.id">
-          <el-avatar :size="40" :src="comment.author.avatar">
-            {{ comment.author.nickname?.[0] || comment.author.username[0] }}
+          <el-avatar :size="40" :src="comment.author?.avatar">
+            {{ comment.author?.nickname?.[0] || comment.author?.username?.[0] || '?' }}
           </el-avatar>
           <div class="comment-content">
             <div class="comment-header">
-              <span class="author-name">{{ comment.author.nickname || comment.author.username }}</span>
+              <span class="author-name">{{ comment.author?.nickname || comment.author?.username }}</span>
               <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
               <el-dropdown v-if="canEditComment(comment)" trigger="click">
                 <el-button type="text" :icon="MoreFilled" />
@@ -166,11 +166,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useMediaStore } from '@/stores/media'
 import { useCommentStore } from '@/stores/comment'
 import { useUserStore } from '@/stores/user'
-import type { Comment } from '@/types'
+import { mediaApi } from '@/api/media'
+import type { Comment } from '@/types/api'
 import {
   ArrowLeft,
   Download,
@@ -187,7 +188,7 @@ const mediaStore = useMediaStore()
 const commentStore = useCommentStore()
 const userStore = useUserStore()
 
-const mediaId = computed(() => route.params.id as string)
+const mediaId = computed(() => Number(route.params.id as string))
 const newComment = ref('')
 const editingComment = ref<Comment | null>(null)
 const editCommentText = ref('')
@@ -198,8 +199,8 @@ const canDelete = computed(() => {
   return userStore.isAdmin
 })
 
-const canEditComment = (comment: Comment) => {
-  return comment.author.id === userStore.user?.id || userStore.isAdmin
+const canEditComment = (comment: Readonly<Comment>) => {
+  return comment.author?.id === userStore.user?.id || userStore.isAdmin
 }
 
 const comments = computed(() => {
@@ -219,9 +220,22 @@ const formatDate = (dateString?: string) => {
   return new Date(dateString).toLocaleString('zh-CN')
 }
 
-const handleDownload = () => {
+const handleDownload = async () => {
   if (!mediaStore.currentMedia) return
-  window.open(mediaStore.currentMedia.url, '_blank')
+  
+  try {
+    const blob = await mediaApi.downloadMedia(mediaStore.currentMedia.id)
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = mediaStore.currentMedia.filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    ElMessage.error('下载失败')
+  }
 }
 
 const handleDelete = async () => {
@@ -240,7 +254,7 @@ const handleDelete = async () => {
   try {
     await mediaStore.deleteMedia(mediaStore.currentMedia.id)
     ElMessage.success('媒体文件删除成功')
-  } catch (error) {
+  } catch  {
     ElMessage.error('媒体文件删除失败')
   }
 }
@@ -249,18 +263,15 @@ const handleSubmitComment = async () => {
   if (!newComment.value.trim()) return
   
   try {
-    await commentStore.createComment({
-      mediaId: mediaId.value,
-      content: newComment.value.trim()
-    })
+    await commentStore.createComment(mediaId.value, newComment.value.trim())
     newComment.value = ''
     ElMessage.success('评论发表成功')
-  } catch (error) {
+  } catch  {
     ElMessage.error('评论发表失败')
   }
 }
 
-const startEditComment = (comment: Comment) => {
+const startEditComment = (comment: Readonly<Comment>) => {
   editingComment.value = comment
   editCommentText.value = comment.content
 }
@@ -274,17 +285,15 @@ const handleUpdateComment = async () => {
   if (!editingComment.value || !editCommentText.value.trim()) return
   
   try {
-    await commentStore.updateComment(editingComment.value.id, {
-      content: editCommentText.value.trim()
-    })
+    await commentStore.updateComment(editingComment.value.id, editCommentText.value.trim(), Number(mediaId.value))
     cancelEditComment()
     ElMessage.success('评论更新成功')
-  } catch (error) {
+  } catch  {
     ElMessage.error('评论更新失败')
   }
 }
 
-const handleDeleteComment = async (comment: Comment) => {
+const handleDeleteComment = async (comment: Readonly<Comment>) => {
   await ElMessageBox.confirm(
     '确定要删除这条评论吗？',
     '删除确认',
@@ -296,9 +305,9 @@ const handleDeleteComment = async (comment: Comment) => {
   )
   
   try {
-    await commentStore.deleteComment(comment.id)
+    await commentStore.deleteComment(comment.id, Number(mediaId.value))
     ElMessage.success('评论删除成功')
-  } catch (error) {
+  } catch  {
     ElMessage.error('评论删除失败')
   }
 }

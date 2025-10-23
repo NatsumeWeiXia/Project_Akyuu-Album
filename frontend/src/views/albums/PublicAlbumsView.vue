@@ -10,13 +10,13 @@
         <el-loading text="加载中..." />
       </div>
       
-      <div v-else-if="albumStore.publicAlbums.length === 0" class="empty-state">
+      <div v-else-if="albumStore.publicAlbums.content.length === 0" class="empty-state">
         <el-empty description="暂无公共相册" />
       </div>
       
       <el-row v-else :gutter="20">
         <el-col 
-          v-for="album in albumStore.publicAlbums" 
+          v-for="album in albumStore.publicAlbums.content" 
           :key="album.id" 
           :xs="24" 
           :sm="12" 
@@ -56,7 +56,7 @@
                 </span>
                 <span class="owner">
                   <el-icon><User /></el-icon>
-                  {{ album.owner.nickname || album.owner.username }}
+                  {{ album.owner?.nickname || album.owner?.username || '未知用户' }}
                 </span>
               </div>
               <div class="album-date">
@@ -180,6 +180,7 @@ onMounted(async () => {
   margin-bottom: 15px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   height: 42px;

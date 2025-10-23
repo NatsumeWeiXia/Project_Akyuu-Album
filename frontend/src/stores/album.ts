@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, readonly } from 'vue'
 import type { Album, PageResponse } from '@/types/api'
-import { albumApi } from '@/api'
+import { albumApi, userApi } from '@/api'
 
 export const useAlbumStore = defineStore('album', () => {
-  const publicAlbums = ref<PageResponse<Album> | null>(null)
+  const publicAlbums = ref<PageResponse<Album>>({ content: [], totalElements: 0, totalPages: 0, size: 20, number: 0, first: true, last: true })
   const myAlbums = ref<Album[]>([])
   const currentAlbum = ref<Album | null>(null)
   const loading = ref(false)
@@ -85,8 +85,16 @@ export const useAlbumStore = defineStore('album', () => {
   }
 
   // 添加相册成员
-  const addAlbumMember = async (albumId: number, userId: number) => {
-    const member = await albumApi.addAlbumMember(albumId, userId)
+  const addAlbumMember = async (albumId: number, username: string) => {
+    const user = await userApi.getUserByUsername(username)
+    if (!user) {
+      throw new Error('用户不存在')
+    }
+    const member = await albumApi.addAlbumMember(albumId, user.id)
+    // Refresh current album to show new member
+    if (currentAlbum.value?.id === albumId) {
+      await fetchAlbum(albumId)
+    }
     return member
   }
 

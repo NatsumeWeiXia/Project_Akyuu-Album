@@ -99,7 +99,7 @@ const registerForm = reactive({
   avatarUrl: ''
 })
 
-const validateConfirmPassword = (rule: any, value: string, callback: any) => {
+const validateConfirmPassword = (rule: unknown, value: string, callback: (error?: Error) => void) => {
   if (value !== registerForm.password) {
     callback(new Error('两次输入的密码不一致'))
   } else {

@@ -12,7 +12,7 @@
             :src="userStore.user?.avatar"
             class="user-avatar"
           >
-            {{ userStore.user?.nickname?.[0] || userStore.user?.username[0] }}
+            {{ userStore.user?.nickname?.[0] || userStore.user?.username?.[0] || '?' }}
           </el-avatar>
           <el-upload
             class="avatar-upload"
@@ -203,7 +203,7 @@ const userStats = reactive({
   totalComments: 0
 })
 
-const handleAvatarChange = (file: any) => {
+const handleAvatarChange = (file: File) => {
   // 处理头像上传逻辑
   console.log('Selected avatar file:', file)
 }
@@ -220,7 +220,7 @@ const handleUpdateProfile = async () => {
           bio: profileForm.bio
         })
         ElMessage.success('个人资料更新成功')
-      } catch (error) {
+      } catch  {
         ElMessage.error('个人资料更新失败')
       }
     }

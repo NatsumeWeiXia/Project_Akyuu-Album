@@ -51,12 +51,7 @@ const router = createRouter({
       component: () => import('@/views/profile/ProfileView.vue'),
       meta: { requiresAuth: true }
     },
-    {
-      path: '/api-test',
-      name: 'api-test',
-      component: () => import('@/components/ApiTester.vue'),
-      meta: { requiresAuth: true }
-    }
+
   ]
 })
 
@@ -68,7 +63,7 @@ router.beforeEach(async (to, from, next) => {
   if (!userStore.user && localStorage.getItem('token')) {
     try {
       await userStore.fetchCurrentUser()
-    } catch (error) {
+    } catch {
       // 获取用户信息失败，清除token
       userStore.clearToken()
     }

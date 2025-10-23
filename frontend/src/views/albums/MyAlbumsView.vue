@@ -160,14 +160,14 @@ const handleCreate = async () => {
   await createFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        await albumStore.createAlbum(createForm)
+        await albumStore.createAlbum(createForm.name, createForm.description, createForm.isPublic)
         ElMessage.success('相册创建成功')
         showCreateDialog.value = false
         // 重置表单
         createForm.name = ''
         createForm.description = ''
         createForm.isPublic = false
-      } catch (error) {
+      } catch  {
         ElMessage.error('相册创建失败')
       }
     }
@@ -270,6 +270,7 @@ onMounted(async () => {
   margin-bottom: 15px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   height: 42px;
